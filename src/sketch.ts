@@ -346,7 +346,7 @@ const sketch = (p: p5) => {
         player2Size / 2,
         HEIGHT - player2Size / 2
       );
-      
+
       // Animate player 2
       if (player2Moving && animationCounter % 8 === 0) {
         player2FrameIndex = (player2FrameIndex + 1) % 3;
