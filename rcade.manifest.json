@@ -1,0 +1,16 @@
+{
+  "$schema": "https://rcade.dev/manifest.schema.json",
+  "name": "goose-chase",
+  "display_name": "Goose Chase",
+  "description": "Chase all the geese out",
+  "visibility": "public",
+  "authors": {
+    "display_name": "Claire Froelich"
+  },
+  "dependencies": [
+    {
+      "name": "@rcade/input-classic",
+      "version": "1.0.0"
+    }
+  ]
+}
