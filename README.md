@@ -11,48 +11,17 @@ npm install
 npm run dev
 ```
 
-## p5.js Basics
+## Gameplay
 
-The template uses p5.js in [instance mode](https://github.com/processing/p5.js/wiki/Global-and-instance-mode) with TypeScript:
+Chase the geese into the RC elevators
 
-```ts
-import p5 from "p5";
+Player 1 controls
 
-const sketch = (p: p5) => {
-  p.setup = () => {
-    p.createCanvas(336, 262); // RCade dimensions
-  };
+- wasd
 
-  p.draw = () => {
-    p.background(26, 26, 46);
-    p.fill(255);
-    p.ellipse(p.width / 2, p.height / 2, 50, 50);
-  };
-};
+Player 2 controls
 
-new p5(sketch, document.getElementById("sketch")!);
-```
-
-## Arcade Controls
-
-## Deployment
-
-First, create a new repository on GitHub:
-
-1. Go to [github.com/new](https://github.com/new)
-2. Create a new repository (can be public or private)
-3. **Don't** initialize it with a README, .gitignore, or license
-
-Then connect your local project and push:
-
-```bash
-git remote add origin git@github.com:YOUR_USERNAME/YOUR_REPO.git
-git push -u origin main
-```
-
-The included GitHub Actions workflow will automatically deploy to RCade.
-
----
+- ijkl
 
 Made with <3 at [The Recurse Center](https://recurse.com)
 
