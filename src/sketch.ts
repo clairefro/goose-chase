@@ -3,6 +3,10 @@ import { PLAYER_1, PLAYER_2, SYSTEM } from "@rcade/plugin-input-classic";
 import { Goose } from "./models/Goose";
 import { Poop } from "./models/Poop";
 import { PowerUp } from "./models/PowerUp";
+import gooseSpriteUrl from "./assets/img/ss-goose-walk.png";
+import pixelFontUrl from "./assets/fonts/PressStart2P-vaV7.ttf";
+import backgroundUrl from "./assets/tilemaps/map.png";
+import quackSoundUrl from "./assets/sounds/quack.mp3";
 
 // Rcade game dimensions
 const WIDTH = 336;
@@ -36,10 +40,45 @@ const sketch = (p: p5) => {
   // Font
   let pixelFont: p5.Font;
 
+  // Background
+  let backgroundImg: p5.Image;
+
+  // Web Audio API for sound
+  let audioContext: AudioContext;
+  let quackBuffer: AudioBuffer | null = null;
+
   p.preload = () => {
-    gooseSpriteSheet = p.loadImage("src/assets/img/ss-goose-walk.png");
-    pixelFont = p.loadFont("src/assets/fonts/PressStart2P-vaV7.ttf");
-  }; // Goal area (elevator)
+    gooseSpriteSheet = p.loadImage(gooseSpriteUrl);
+    pixelFont = p.loadFont(pixelFontUrl);
+    backgroundImg = p.loadImage(backgroundUrl);
+  };
+
+  // Initialize audio after user interaction
+  function initAudio() {
+    if (!audioContext) {
+      audioContext = new AudioContext();
+
+      // Load quack sound
+      fetch(quackSoundUrl)
+        .then((response) => response.arrayBuffer())
+        .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
+        .then((audioBuffer) => {
+          quackBuffer = audioBuffer;
+        })
+        .catch((err) => console.error("Error loading quack sound:", err));
+    }
+  }
+
+  // Function to play quack sound
+  function playQuack() {
+    if (!quackBuffer) return;
+
+    const source = audioContext.createBufferSource();
+    source.buffer = quackBuffer;
+    source.connect(audioContext.destination);
+    source.start(0);
+  }
+  // Goal area (elevator)
   const goalWidth = 50;
   const goalHeight = 40;
   const goalX = WIDTH - goalWidth - 20; // 20px space from right wall
@@ -112,7 +151,8 @@ const sketch = (p: p5) => {
   };
 
   p.draw = () => {
-    p.background(120, 180, 120); // Grass green
+    // Draw background
+    p.image(backgroundImg, 0, 0, WIDTH, HEIGHT);
 
     // ====== START SCREEN ======
     if (!gameStarted) {
@@ -135,10 +175,12 @@ const sketch = (p: p5) => {
         gameStarted = true;
         twoPlayerMode = false;
         startTime = p.millis();
+        initAudio(); // Initialize audio on first user interaction
       } else if (SYSTEM.TWO_PLAYER) {
         gameStarted = true;
         twoPlayerMode = true;
         startTime = p.millis();
+        initAudio(); // Initialize audio on first user interaction
       }
       return;
     }
@@ -339,6 +381,7 @@ const sketch = (p: p5) => {
 
       if (touchesGoalX && touchesGoalY) {
         geeseHerded++;
+        playQuack(); // Play quack sound
         if (!gameWon && geese.length === 1) {
           // Last goose herded - game won!
           gameWon = true;
