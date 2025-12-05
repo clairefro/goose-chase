@@ -4,6 +4,8 @@ import { Goose } from "./models/Goose";
 import { Poop } from "./models/Poop";
 import { PowerUp } from "./models/PowerUp";
 import gooseSpriteUrl from "./assets/img/ss-goose-walk.png";
+import cat1SpriteUrl from "./assets/img/ss-cat-1.png";
+import cat2SpriteUrl from "./assets/img/ss-cat-2.png";
 import pixelFontUrl from "./assets/fonts/PressStart2P-vaV7.ttf";
 import backgroundUrl from "./assets/tilemaps/map.png";
 import quackSoundUrl from "./assets/sounds/quack.mp3";
@@ -37,6 +39,29 @@ const sketch = (p: p5) => {
   let gooseSpriteSheet: p5.Image;
   let gooseFrames: p5.Image[] = [];
 
+  // Player sprites
+  let cat1SpriteSheet: p5.Image;
+  let cat2SpriteSheet: p5.Image;
+  let cat1Frames: {
+    down: p5.Image[];
+    left: p5.Image[];
+    right: p5.Image[];
+    up: p5.Image[];
+  } = { down: [], left: [], right: [], up: [] };
+  let cat2Frames: {
+    down: p5.Image[];
+    left: p5.Image[];
+    right: p5.Image[];
+    up: p5.Image[];
+  } = { down: [], left: [], right: [], up: [] };
+
+  // Player animation
+  let player1Direction = "down";
+  let player2Direction = "down";
+  let player1FrameIndex = 0;
+  let player2FrameIndex = 0;
+  let animationCounter = 0;
+
   // Font
   let pixelFont: p5.Font;
 
@@ -49,6 +74,8 @@ const sketch = (p: p5) => {
 
   p.preload = () => {
     gooseSpriteSheet = p.loadImage(gooseSpriteUrl);
+    cat1SpriteSheet = p.loadImage(cat1SpriteUrl);
+    cat2SpriteSheet = p.loadImage(cat2SpriteUrl);
     pixelFont = p.loadFont(pixelFontUrl);
     backgroundImg = p.loadImage(backgroundUrl);
   };
@@ -144,6 +171,30 @@ const sketch = (p: p5) => {
       gooseFrames.push(frame);
     }
 
+    // Extract cat frames (4 rows x 3 cols: down, left, right, up)
+    const catFrameWidth = cat1SpriteSheet.width / 3;
+    const catFrameHeight = cat1SpriteSheet.height / 4;
+    const directions = ["down", "left", "right", "up"] as const;
+
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 3; col++) {
+        const frame1 = cat1SpriteSheet.get(
+          col * catFrameWidth,
+          row * catFrameHeight,
+          catFrameWidth,
+          catFrameHeight
+        );
+        const frame2 = cat2SpriteSheet.get(
+          col * catFrameWidth,
+          row * catFrameHeight,
+          catFrameWidth,
+          catFrameHeight
+        );
+        cat1Frames[directions[row]].push(frame1);
+        cat2Frames[directions[row]].push(frame2);
+      }
+    }
+
     // Create geese
     for (let i = 0; i < numGeese; i++) {
       geese.push(new Goose(p));
@@ -216,22 +267,39 @@ const sketch = (p: p5) => {
     }
 
     // Handle input from arcade controls - Player 1
+    let player1Moving = false;
     if (PLAYER_1.DPAD.up) {
       player1Y -= playerSpeed;
+      player1Direction = "up";
+      player1Moving = true;
     }
     if (PLAYER_1.DPAD.down) {
       player1Y += playerSpeed;
+      player1Direction = "down";
+      player1Moving = true;
     }
     if (PLAYER_1.DPAD.left) {
       player1X -= playerSpeed;
+      player1Direction = "left";
+      player1Moving = true;
     }
     if (PLAYER_1.DPAD.right) {
       player1X += playerSpeed;
+      player1Direction = "right";
+      player1Moving = true;
     }
 
     // Keep player 1 in bounds
     player1X = p.constrain(player1X, player1Size / 2, WIDTH - player1Size / 2);
     player1Y = p.constrain(player1Y, player1Size / 2, HEIGHT - player1Size / 2);
+
+    // Animate player 1
+    if (player1Moving) {
+      animationCounter++;
+      if (animationCounter % 8 === 0) {
+        player1FrameIndex = (player1FrameIndex + 1) % 3;
+      }
+    }
 
     // Check power-up collisions for player 1
     powerUps = powerUps.filter((powerUp) => {
@@ -244,18 +312,27 @@ const sketch = (p: p5) => {
     });
 
     // Handle input for Player 2 if in two-player mode
+    let player2Moving = false;
     if (twoPlayerMode) {
       if (PLAYER_2.DPAD.up) {
         player2Y -= playerSpeed;
+        player2Direction = "up";
+        player2Moving = true;
       }
       if (PLAYER_2.DPAD.down) {
         player2Y += playerSpeed;
+        player2Direction = "down";
+        player2Moving = true;
       }
       if (PLAYER_2.DPAD.left) {
         player2X -= playerSpeed;
+        player2Direction = "left";
+        player2Moving = true;
       }
       if (PLAYER_2.DPAD.right) {
         player2X += playerSpeed;
+        player2Direction = "right";
+        player2Moving = true;
       }
 
       // Keep player 2 in bounds
@@ -269,6 +346,11 @@ const sketch = (p: p5) => {
         player2Size / 2,
         HEIGHT - player2Size / 2
       );
+      
+      // Animate player 2
+      if (player2Moving && animationCounter % 8 === 0) {
+        player2FrameIndex = (player2FrameIndex + 1) % 3;
+      }
 
       // Check power-up collisions for player 2
       powerUps = powerUps.filter((powerUp) => {
@@ -402,21 +484,20 @@ const sketch = (p: p5) => {
       goose.draw(p, gooseFrames);
     }
 
-    // Draw player 1 as red X
-    p.stroke(200, 50, 50);
-    p.strokeWeight(4);
-    p.line(
-      player1X - player1Size / 2,
-      player1Y - player1Size / 2,
-      player1X + player1Size / 2,
-      player1Y + player1Size / 2
+    // Draw player 1 cat sprite
+    p.push();
+    p.imageMode(p.CENTER);
+    const catSize = player1Size * 3;
+    p.image(
+      cat1Frames[player1Direction as keyof typeof cat1Frames][
+        player1FrameIndex
+      ],
+      player1X,
+      player1Y,
+      catSize,
+      catSize
     );
-    p.line(
-      player1X + player1Size / 2,
-      player1Y - player1Size / 2,
-      player1X - player1Size / 2,
-      player1Y + player1Size / 2
-    );
+    p.pop();
 
     // Show BIG MODE text if powered up
     if (player1PowerUpTimer > 0) {
@@ -426,22 +507,21 @@ const sketch = (p: p5) => {
       p.text("BIG MODE", player1X, player1Y - player1Size / 2 - 5);
     }
 
-    // Draw player 2 as blue X if in two-player mode
+    // Draw player 2 cat sprite if in two-player mode
     if (twoPlayerMode) {
-      p.stroke(50, 100, 255);
-      p.strokeWeight(4);
-      p.line(
-        player2X - player2Size / 2,
-        player2Y - player2Size / 2,
-        player2X + player2Size / 2,
-        player2Y + player2Size / 2
+      p.push();
+      p.imageMode(p.CENTER);
+      const cat2Size = player2Size * 3;
+      p.image(
+        cat2Frames[player2Direction as keyof typeof cat2Frames][
+          player2FrameIndex
+        ],
+        player2X,
+        player2Y,
+        cat2Size,
+        cat2Size
       );
-      p.line(
-        player2X + player2Size / 2,
-        player2Y - player2Size / 2,
-        player2X - player2Size / 2,
-        player2Y + player2Size / 2
-      );
+      p.pop();
 
       // Show BIG MODE text if powered up
       if (player2PowerUpTimer > 0) {
