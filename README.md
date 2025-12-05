@@ -2,6 +2,9 @@
 
 Chase all the geese out of RC
 
+
+<img width="685" height="551" alt="image" src="https://github.com/user-attachments/assets/c8924c95-1cc3-4074-aaca-01d619d3582f" />
+
 ## Getting Started
 
 Install dependencies:
