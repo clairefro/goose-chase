@@ -35,43 +35,6 @@ new p5(sketch, document.getElementById("sketch")!);
 
 ## Arcade Controls
 
-This template uses `@rcade/plugin-input-classic` for arcade input:
-
-```ts
-import { PLAYER_1, SYSTEM } from "@rcade/plugin-input-classic";
-
-// D-pad
-if (PLAYER_1.DPAD.up) {
-  /* ... */
-}
-if (PLAYER_1.DPAD.down) {
-  /* ... */
-}
-if (PLAYER_1.DPAD.left) {
-  /* ... */
-}
-if (PLAYER_1.DPAD.right) {
-  /* ... */
-}
-
-// Buttons
-if (PLAYER_1.A) {
-  /* ... */
-}
-if (PLAYER_1.B) {
-  /* ... */
-}
-
-// System
-if (SYSTEM.ONE_PLAYER) {
-  /* Start game */
-}
-```
-
-## RCade Screen Size
-
-The RCade cabinet uses a 336x262 pixel display. The template is pre-configured with these dimensions.
-
 ## Deployment
 
 First, create a new repository on GitHub:
@@ -106,3 +69,11 @@ Goose: https://duckhive.itch.io/goose
 ### Font
 
 Press Start 2P by [codeman38](https://www.fontspace.com/codeman38)
+
+### Map art
+
+[Modern Interiors - lemzu](https://limezu.itch.io/moderninteriors?download#google_vignette)
+
+### Tilemap editor
+
+https://www.spritefusion.com/editor
