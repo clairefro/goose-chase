@@ -12,7 +12,7 @@ class Goose {
   y: number;
   vx: number = 0;
   vy: number = 0;
-  size: number = 12;
+  size: number = 8;
   fleeDistance: number = 65;
   fleeSpeed: number = 2.5;
   wanderSpeed: number = 0.7;
@@ -161,17 +161,19 @@ const sketch = (p: p5) => {
   let gameStarted = false;
   let twoPlayerMode = false;
   let geese: Goose[] = [];
-  const numGeese = 100;
+  const numGeese = 404;
 
   // Sprite sheet
   let gooseSpriteSheet: p5.Image;
   let gooseFrames: p5.Image[] = [];
 
-  p.preload = () => {
-    gooseSpriteSheet = p.loadImage("src/assets/ss-goose-walk.png");
-  };
+  // Font
+  let pixelFont: p5.Font;
 
-  // Goal area (elevator)
+  p.preload = () => {
+    gooseSpriteSheet = p.loadImage("src/assets/img/ss-goose-walk.png");
+    pixelFont = p.loadFont("src/assets/fonts/PressStart2P-vaV7.ttf");
+  }; // Goal area (elevator)
   const goalWidth = 50;
   const goalHeight = 40;
   const goalX = WIDTH - goalWidth - 20; // 20px space from right wall
@@ -208,6 +210,9 @@ const sketch = (p: p5) => {
     player2X = (WIDTH * 2) / 3;
     player2Y = HEIGHT / 2;
 
+    // Set 8-bit pixel font for all text
+    p.textFont(pixelFont);
+
     // Extract frames from sprite sheet (adjust frame count and size as needed)
     // Frames are 64x32 pixels in a horizontal row
     const frameWidth = 64;
@@ -239,13 +244,13 @@ const sketch = (p: p5) => {
     if (!gameStarted) {
       // Show start screen
       p.fill(255);
-      p.textSize(18);
+      p.textSize(12);
       p.textAlign(p.CENTER, p.CENTER);
       p.text("GOOSE CHASE", WIDTH / 2, HEIGHT / 2 - 30);
-      p.textSize(12);
+      p.textSize(8);
       p.text("Press 1P START for solo", WIDTH / 2, HEIGHT / 2);
       p.text("Press 2P START for team", WIDTH / 2, HEIGHT / 2 + 20);
-      p.textSize(10);
+      p.textSize(6);
       p.text(
         "Use D-PAD to chase the geese out of RC",
         WIDTH / 2,
@@ -392,12 +397,11 @@ const sketch = (p: p5) => {
           // Last goose herded - game won!
           gameWon = true;
           // Logarithmic scoring: faster times get exponentially higher scores
-          // Score = 10000 / (1 + log(time + 1))
-          // At 10s: ~8680, at 30s: ~7178, at 60s: ~5556, at 120s: ~4637
+          // Base score 100000 - higher starting value
           // Joke: If you take too long, you can get negative scores!
           const timeSeconds = elapsedTime / 1000;
           finalScore = Math.round(
-            10000 / (1 + Math.log10(timeSeconds + 1)) - timeSeconds * 15
+            100000 / (1 + Math.log10(timeSeconds + 1)) - timeSeconds * 15
           );
         }
         return false; // Remove this goose
@@ -446,7 +450,7 @@ const sketch = (p: p5) => {
 
     // Draw geese count and timer
     p.fill(255);
-    p.textSize(14);
+    p.textSize(8);
     p.textAlign(p.LEFT, p.TOP);
     p.text(`Geese: ${geeseHerded}/${numGeese}`, 10, 10);
 
@@ -458,20 +462,20 @@ const sketch = (p: p5) => {
     // Show current score in real-time
     const timeSeconds = elapsedTime / 1000;
     const currentScore = Math.round(
-      10000 / (1 + Math.log10(timeSeconds + 1)) - timeSeconds * 15
+      100000 / (1 + Math.log10(timeSeconds + 1)) - timeSeconds * 15
     );
     p.text(`Score: ${currentScore}`, 10, 50);
 
     // Check for win condition
     if (gameWon) {
       p.fill(255, 255, 100);
-      p.textSize(24);
+      p.textSize(16);
       p.textAlign(p.CENTER, p.CENTER);
       p.text("YOU WIN!", WIDTH / 2, HEIGHT / 2 - 20);
-      p.textSize(16);
+      p.textSize(10);
       p.text(`Time: ${timeStr}`, WIDTH / 2, HEIGHT / 2 + 10);
       p.text(`Score: ${finalScore}`, WIDTH / 2, HEIGHT / 2 + 35);
-      p.textSize(12);
+      p.textSize(8);
       p.text("Press A to restart", WIDTH / 2, HEIGHT / 2 + 60);
 
       // Check for restart
